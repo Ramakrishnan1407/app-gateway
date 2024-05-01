@@ -247,7 +247,7 @@ resource "azurerm_application_gateway" "network2" {
     backend_http_settings_name = local.http_setting_name
   }
 }  
-*/
+*/ 
 
 resource "azurerm_web_application_firewall_policy" "example" {
   name                = "example-wafpolicy"
