@@ -112,6 +112,14 @@ resource "azurerm_public_ip" "example" {
   sku                 = "Standard"
 }
 
+resource "azurerm_public_ip" "example2" {
+  name                = "example-pip2"
+  resource_group_name = azurerm_resource_group.example.name
+  location            = azurerm_resource_group.example.location
+  allocation_method   = "Static"
+  sku                 = "Standard"
+}
+
 # since these variables are re-used - a locals block makes this more maintainable
 locals {
   backend_address_pool_name      = "${azurerm_virtual_network.example.name}-beap"
@@ -146,11 +154,11 @@ resource "azurerm_application_gateway" "network" {
     port = 80
   }
   
-  /*
+  
   frontend_ip_configuration {
     name                 = local.frontend_ip_configuration_name
     public_ip_address_id = azurerm_public_ip.example.id
-  }*/
+  }
 
   frontend_ip_configuration {
     name                          = "fip-private"
@@ -215,7 +223,7 @@ resource "azurerm_application_gateway" "network2" {
 
   frontend_ip_configuration {
     name                 = local.frontend_ip_configuration_name
-    public_ip_address_id = azurerm_public_ip.example.id
+    public_ip_address_id = azurerm_public_ip.example2.id
   }
 
   backend_address_pool {
