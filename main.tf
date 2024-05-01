@@ -189,7 +189,7 @@ resource "azurerm_application_gateway" "network" {
   }
 }  
 
-/*
+
 resource "azurerm_application_gateway" "network2" {
   name                = "example-appgateway3"
   resource_group_name = azurerm_resource_group.example.name
@@ -247,7 +247,7 @@ resource "azurerm_application_gateway" "network2" {
     backend_http_settings_name = local.http_setting_name
   }
 }  
-*/ 
+
 
 resource "azurerm_web_application_firewall_policy" "example" {
   name                = "example-wafpolicy"
