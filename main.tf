@@ -180,7 +180,7 @@ resource "azurerm_application_gateway" "network" {
 }  
 
 
-resource "azurerm_application_gateway" "network" {
+resource "azurerm_application_gateway" "network2" {
   name                = "example-appgateway3"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
