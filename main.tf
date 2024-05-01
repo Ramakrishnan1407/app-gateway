@@ -143,11 +143,12 @@ resource "azurerm_application_gateway" "network" {
     name = local.frontend_port_name
     port = 80
   }
-
+  
+  /*
   frontend_ip_configuration {
     name                 = local.frontend_ip_configuration_name
     public_ip_address_id = azurerm_public_ip.example.id
-  }
+  }*/
 
   frontend_ip_configuration {
     name                          = "fip-private"
@@ -186,7 +187,7 @@ resource "azurerm_application_gateway" "network" {
   }
 }  
 
-/*
+
 resource "azurerm_application_gateway" "network2" {
   name                = "example-appgateway3"
   resource_group_name = azurerm_resource_group.example.name
@@ -242,4 +243,4 @@ resource "azurerm_application_gateway" "network2" {
     backend_http_settings_name = local.http_setting_name
   }
 }  
-*/
+
