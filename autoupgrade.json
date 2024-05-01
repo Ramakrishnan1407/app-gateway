@@ -1,0 +1,15 @@
+{
+  "properties": {
+    "maintenanceWindow": {
+        "schedule": {
+            "weekly": {
+                "intervalWeeks": 1,
+                "dayOfWeek": "Tuesday"
+            }
+        },
+        "durationHours": 4,
+        "utcOffset": "+01:00",
+        "startTime": "13:00"
+    }
+  }
+}

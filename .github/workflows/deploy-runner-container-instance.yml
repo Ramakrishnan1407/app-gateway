@@ -1,0 +1,72 @@
+name: 'Acrimage'
+ 
+on:
+  push:
+    branches:
+    - main
+  pull_request:
+  
+  workflow_dispatch:
+      inputs:
+        action:
+          description: Action
+          required: true
+          default: create
+          options:
+            - create
+            - destroy
+
+jobs:
+  acrrunner:
+    name: 'acrrunner'
+    env:
+      ARM_CLIENT_ID: ${{ secrets.AZURE_AD_CLIENT_ID }}
+      ARM_CLIENT_SECRET: ${{ secrets.AZURE_AD_CLIENT_SECRET }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_AD_TENANT_ID }}
+      HELM_EXPERIMENTAL_OCI: 1
+      HELM_VERSION_TO_INSTALL: 3.5.0
+      ACR_NAME: acrtest1407
+      ACR_REPO_NAME: becse/shap/mule/chart/hello-world
+
+    runs-on: ubuntu-latest
+    outputs:
+      QUE_JOB: ${{ steps.github-workflow.outputs.QUE_JOB }}
+    environment: production
+ 
+    defaults:
+      run:
+        shell: bash
+ 
+    steps:
+    # Checkout the repository to the GitHub Actions runner
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    - name: Azure CLI script file
+      uses: azure/CLI@v1
+      with:
+        azcliversion: 2.30.0
+        inlineScript: |
+          az login --service-principal -u $ARM_CLIENT_ID -p $ARM_CLIENT_SECRET --tenant 'raminzenithyahooco.onmicrosoft.com'
+          az group list
+    
+    - name: github-workflow
+      id: github-workflow
+      shell: pwsh
+      run: |
+        $list = gh run list
+        echo "QUE_JOB=$list" >> $env:GITHUB_OUTPUT
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+
+      - uses: ./.github/actions/runner-container-instance
+        with:
+          instance-name: aci-runner-01
+          resource-group: rg-becse-sharedrunners-prd-weeu-01
+          acr: acrbecsshdtoolingprwe01
+          image: actions-runner-generic:latest
+          identity-id: /subscriptions/6d0a39fa-b7c7-4de7-8dff-5d294b869e45/resourcegroups/rg-becse-sharedrunners-prd-weeu-01/providers/Microsoft.ManagedIdentity/userAssignedIdentities/uai-becse-sharedrunners-app-prd-weeu-01
+          subnet-id: /subscriptions/6d0a39fa-b7c7-4de7-8dff-5d294b869e45/resourceGroups/rg-tepconnectivity-prd-weeu-01/providers/Microsoft.Network/virtualNetworks/vnet-itshdtooling-prd-weeu-01/subnets/snet-shared-mgmt-prd-weeu-01
+          runner-token: ${{ inputs.runner-token }}
+          runner-labels: "aci-runner-01,generic"

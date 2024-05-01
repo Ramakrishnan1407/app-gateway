@@ -1,0 +1,95 @@
+name: 🐋 build-container-image
+run-name: (${{ inputs.azurerm-env }}) ${{ inputs.image-repo }} @${{ github.ref_name }}
+on:
+  workflow_call:
+    inputs:
+      image-repo:
+        type: string
+      azurerm-env:
+        type: string
+      allow-publish-pre-release:
+        type: boolean
+        default: false
+
+  workflow_dispatch:
+    inputs:
+      image-repo:
+        type: choice
+        description: image repo
+        options:
+          - ubuntu-2204-base
+          - ubuntu-2204-azdo-agent
+          - actions-runner-generic
+          - actions-runner-webtest-node14
+          - github-runner-generic
+
+      azurerm-env:
+        type: choice
+        description: environment
+        options:
+          - nonprd
+          - prd
+      allow-publish-pre-release:
+        description: allows publish to the registry even if the version is a prerelease
+        type: boolean
+        default: false
+env:
+  acr: acrbecsshdtooling${{ inputs.azurerm-env == 'prd' && 'pr' || 'np' }}we01
+  rg: rg-becse-sharedacr-${{ inputs.azurerm-env }}-weeu-01
+jobs:
+  build:
+    name: build-${{ inputs.azurerm-env }}
+    permissions:
+      id-token: write
+      contents: write
+    runs-on: ubuntu-latest
+    environment: azurerm-${{ inputs.azurerm-env }}-it-shdtooling-auto
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: load env
+        run: cat ./env/azurerm-${{ inputs.azurerm-env }}.env >> $GITHUB_ENV
+
+      - name: az login
+        uses: azure/login@v2
+        with:
+          client-id: ${{ env.ARM_CLIENT_ID }}
+          tenant-id: ${{ env.ARM_TENANT_ID }}
+          subscription-id: ${{ env.ARM_SUBSCRIPTION_ID }}
+
+      - name: gitversion
+        id: gv
+        shell: pwsh
+        run: |
+          git fetch --unshallow
+          dotnet tool install --global GitVersion.Tool --version 5.*
+
+          if ('${{ github.ref }}' -ne "refs/heads/main") {
+              # this mode will generate an unique prerelease for each commit
+              # but in main dont want this mode, as this would otherwise add a prelease tag
+              $mode='mode=ContinuousDeployment'
+          }
+          cd container-images/${{ inputs.image-repo }}
+
+          $gv = dotnet-gitversion /overrideconfig tag-prefix=${{ inputs.image-repo }}- $mode
+          Write-Host $gv
+
+          $gvObj = $gv | ConvertFrom-Json
+          "semver=$($gvObj.SemVer)" >> $env:GITHUB_OUTPUT
+
+      - name: build
+        id: build
+        uses: RoyalAholdDelhaize/az-actions/build-acr-image@v1.8.0
+        with:
+          subscription: ${{ env.ARM_SUBSCRIPTION_ID }}
+          resource-group: ${{ env.rg }}
+          acr: ${{ env.acr }}
+          workdir: container-images/${{ inputs.image-repo }}
+          image-repository: ${{ inputs.image-repo }}
+          image-version: ${{ steps.gv.outputs.semver }}
+          release-tag: ${{ inputs.image-repo }}-${{ steps.gv.outputs.semver }}
+          build-only: ${{ github.ref_name != 'main' && inputs.allow-publish-pre-release == false && 'true' || 'false' }}
+          is-prerelease: ${{ github.ref_name != 'main' && 'true' || 'false' }}
+
+      - name: print summary
+        run: echo "- 🚀 ${{ env.acr }}.azurecr.io/${{ steps.build.outputs.images }}" >> $GITHUB_STEP_SUMMARY
