@@ -157,7 +157,7 @@ resource "azurerm_application_gateway" "network" {
   
   frontend_ip_configuration {
     name                 = local.frontend_ip_configuration_name
-    public_ip_address_id = azurerm_public_ip.example.id
+    public_ip_address_id = azurerm_public_ip.example2.id
   }
 
   frontend_ip_configuration {
@@ -223,7 +223,7 @@ resource "azurerm_application_gateway" "network2" {
 
   frontend_ip_configuration {
     name                 = local.frontend_ip_configuration_name
-    public_ip_address_id = azurerm_public_ip.example2.id
+    public_ip_address_id = azurerm_public_ip.example.id
   }
 
   backend_address_pool {
