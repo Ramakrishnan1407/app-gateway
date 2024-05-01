@@ -98,7 +98,7 @@ resource "azurerm_virtual_network" "example" {
 }
 
 resource "azurerm_subnet" "example" {
-  name                 = "example"
+  name                 = "example2"
   resource_group_name  = azurerm_resource_group.example.name
   virtual_network_name = azurerm_virtual_network.example.name
   address_prefixes     = ["10.254.0.0/24"]
@@ -124,7 +124,7 @@ locals {
 }
 
 resource "azurerm_application_gateway" "network" {
-  name                = "example-appgateway"
+  name                = "example-appgateway2"
   resource_group_name = azurerm_resource_group.example.name
   location            = azurerm_resource_group.example.location
 
