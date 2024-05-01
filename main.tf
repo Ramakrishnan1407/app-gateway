@@ -149,6 +149,13 @@ resource "azurerm_application_gateway" "network" {
     public_ip_address_id = azurerm_public_ip.example.id
   }
 
+  frontend_ip_configuration {
+    name                          = "fip-private"
+    private_ip_address_allocation = "Static"
+    private_ip_address            = "10.254.0.11"
+    subnet_id                     = azurerm_subnet.example.id
+  }
+
   backend_address_pool {
     name = local.backend_address_pool_name
   }
@@ -179,7 +186,7 @@ resource "azurerm_application_gateway" "network" {
   }
 }  
 
-
+/*
 resource "azurerm_application_gateway" "network2" {
   name                = "example-appgateway3"
   resource_group_name = azurerm_resource_group.example.name
@@ -235,4 +242,4 @@ resource "azurerm_application_gateway" "network2" {
     backend_http_settings_name = local.http_setting_name
   }
 }  
-
+*/
